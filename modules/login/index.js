@@ -1,5 +1,15 @@
+var Dockbar = require('../../modules/dockbar').Dockbar;
+
 function Login(config) {
-	this._config = config;
+	var instance = this;
+
+	instance._config = config;
+
+	instance._dockbar = new Dockbar(
+		{
+			portletNamespace: config.portletNamespace
+		}
+	);
 }
 
 Login.prototype = {
@@ -8,17 +18,7 @@ Login.prototype = {
 	signIn: function(user, password, rememberMe) {
 		var instance = this;
 
-		casper.open('/home');
-
-		casper.then(
-			function() {
-				casper.echo('Home page loaded, click on login link');
-
-				casper.click('.sign-in a');
-
-				casper.waitForSelector('#' + instance._config.portletNamespace + 'fm');
-			}
-		);
+		instance._dockbar.navigateToSignIn();
 
 		casper.then(
 			function() {
@@ -51,30 +51,15 @@ Login.prototype = {
 	},
 
 	signOut: function() {
-		casper.waitForSelector(
-			'.user-avatar-link .user-full-name',
+		var instance = this;
+
+		instance._dockbar.navigateToSignOut();
+
+		casper.waitUntilVisible('.sign-in a',
 			function onSuccess() {
-				casper.click('.user-avatar-link');
-			},
-			function onTimeout() {
-				casper.test.fail("Not logged successfully");
-			}
-		);
+				casper.echo('Page URL is: ' + casper.getCurrentUrl());
 
-		casper.waitUntilVisible('.sign-out a',
-			function onSuccess() {
-				casper.click('.sign-out a');
-
-				casper.waitUntilVisible('.sign-in a',
-					function onSuccess() {
-						casper.echo('Page URL is: ' + casper.getCurrentUrl());
-
-						casper.test.assertUrlMatch('\/web\/guest\/home', 'User logged out successfully');
-					},
-					function onFail() {
-						casper.test.fail('User not logged out successfully');
-					}
-				);
+				casper.test.assertUrlMatch('\/web\/guest\/home', 'User logged out successfully');
 			},
 			function onFail() {
 				casper.test.fail('User not logged out successfully');

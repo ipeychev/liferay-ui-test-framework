@@ -11,17 +11,19 @@ var casper = require('casper').create(
 );
 
 var Login = require('../../modules/login').Login;
+var AddCategory = require('./add.js').AddCategory;
+var Navigate = require('./navigate.js').Navigate;
 
 var login = new Login(
-        {
-            portletNamespace: '_58_'
-        }
-    );
+    {
+        portletNamespace: '_58_'
+    }
+);
 
 casper.start(
     'http://localhost:8080',
     function() {
-        casper.echo('Liferay UI Framework Test suite is running');
+        casper.echo('Liferay Categories suite is running');
 
         casper.echo('Page URL is: ' + casper.getCurrentUrl());
 
@@ -32,22 +34,16 @@ casper.start(
 );
 
 casper.then(
-    function testLogin() {
-        casper.captureSelector('snapshots/before_login.png', '.yui3-skin-sam');
-
+    function gotoCategoriesAdmin() {
         login.signIn(casper.cli.get('u') || 'test@liferay.com', casper.cli.get('p') || 'test', false);
-
-        casper.captureSelector('snapshots/logged.png', '.yui3-skin-sam');
     }
 );
 
 casper.then(
-    function testLogout() {
-        casper.echo('Login out');
+    function testAddCategory() {
+        var navigate = new Navigate();
 
-        login.signOut();
-
-        casper.captureSelector('snapshots/logged_out.png', '.yui3-skin-sam');
+        navigate.navigateToCategoriesAdmin();
     }
 );
 
